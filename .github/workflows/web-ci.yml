@@ -1,12 +1,20 @@
 name: Web CI and Security Pipeline
 
-on: push: branches: ["master"] pull_request: branches: ["master"] workflow_dispatch:
+on: push: branches: ["master"]
+
+pull_request: branches: ["master"]
+
+workflow_dispatch:
 
 permissions: contents: read
 
 jobs:
 
-code-quality: runs-on: ubuntu-latest steps: - name: Checkout Repository uses: actions/checkout@v6
+code-quality: name: Code Quality Checks runs-on: ubuntu-latest
+
+steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v6
 
   - name: Set up Node.js
     uses: actions/setup-node@v6
@@ -26,7 +34,11 @@ code-quality: runs-on: ubuntu-latest steps: - name: Checkout Repository uses: ac
     run: npx --yes eslint@9 script.js
 
 
-testing: runs-on: ubuntu-latest needs: code-quality steps: - name: Checkout Repository uses: actions/checkout@v6
+testing: name: Functional Testing runs-on: ubuntu-latest needs: code-quality
+
+steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v6
 
   - name: Set up Node.js
     uses: actions/setup-node@v6
@@ -40,7 +52,14 @@ testing: runs-on: ubuntu-latest needs: code-quality steps: - name: Checkout Repo
     run: echo "BUILD AND TEST SUCCESS"
 
 
-security-check: runs-on: ubuntu-latest steps: - name: Checkout Repository uses: actions/checkout@v6 with: fetch-depth: 0 persist-credentials: false
+security-check: name: Security Scanning runs-on: ubuntu-latest
+
+steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v6
+    with:
+      fetch-depth: 0
+      persist-credentials: false
 
   - name: Trivy Filesystem Scan
     uses: aquasecurity/trivy-action@v0.36.0
@@ -67,7 +86,4 @@ security-check: runs-on: ubuntu-latest steps: - name: Checkout Repository uses: 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITLEAKS_ENABLE_COMMENTS: "false"
-      GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
-
-
-pipeline-summary: runs-on: ubuntu-latest needs: [code-quality, testing, security-check] if: always() steps: - name: Generate Execution Summary run: | echo "## CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY echo "|---|---|" >> $GITHUB_STEP_SUMMARY echo "| Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY echo "| Functional Testing | ${{ needs.testing.result }} |" >> $GITHUB_STEP_SUMMARY echo "| Security Checks | ${{ needs.security-check.result }} |" >> $GITHUB_STEP_SUMMARY
+      GITLEAK
