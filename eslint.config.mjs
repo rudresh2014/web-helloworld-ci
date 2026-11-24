@@ -1,0 +1,1 @@
+export default [ { files: ["script.js"], languageOptions: { sourceType: "script", globals: { document: "readonly", module: "readonly" } }, rules: { "no-unused-vars": "error", "no-undef": "error", "eqeqeq": "error", "no-debugger": "error", "no-unreachable": "error" } } ];
